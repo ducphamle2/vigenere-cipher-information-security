@@ -10,6 +10,11 @@
 #define ALPHABET 26 // the total number of characters in the alphabet
 #define LOOPTIME 7 // total number of times looping to find m
 
+/* REFERENCE OF THE ALGORITHM: 
+  Algorithm:  practicalcryptography.com/cryptanalysis/stochastic-searching/cryptanalysis-vigenere-cipher/
+  Index of Coincidence (IC) formula: https://pages.mtu.edu/~shene/NSF-4/Tutorial/VIG/Vig-IOC.html 
+*/
+
 int m = 1; // key length of the cipher. It starts with 1, and loop until get to size of the cipher text or when we feel it's enough
 int n = 0; // length of the text
 int size = 0; // size for each substring. Needs to be global var to be used in two different functions
