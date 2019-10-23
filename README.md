@@ -1,2 +1,1 @@
-# vigenere-cipher-information-security
-An implementation of vigenere cipher decoding without key using C Programming Language
+Open the xxx/doc/index.html for helping to use the SDK
