@@ -1,12 +1,14 @@
 import sys
 import os
 import numpy
+import collections
+
 FIRST = 65  # first char in ascii table
 LAST = 90  # last char in ascii table
 MIN = 0.06  # min max values for the IC
 MAX = 0.075
 ALPHABET = 26  # the total number of characters in the alphabet
-LOOPTIME = 7  # total number of times looping to find m
+LOOPTIME = 10  # total number of times looping to find m
 
 """ REFERENCE OF THE ALGORITHM: 
   Algorithm:  practicalcryptography.com/cryptanalysis/stochastic-searching/cryptanalysis-vigenere-cipher/
@@ -119,16 +121,82 @@ def vigenereAlgorithm(str, m):
         print ("Meaningless text")
 
 
+### Stage 2: Find key using key length ###
+
+english_freq = {
+        'A': .08167, 'B': .01492, 'C': .02782, 'D': .04253,
+        'E': .12702, 'F': .02228, 'G': .02015, 'H': .06094,
+        'I': .06094, 'J': .00153, 'K': .00772, 'L': .04025,
+        'M': .02406, 'N': .06749, 'O': .07507, 'P': .01929,
+        'Q': .00095, 'R': .05987, 'S': .06327, 'T': .09056,
+        'U': .02758, 'V': .00978, 'W': .02360, 'X': .00150,
+        'Y': .01974, 'Z': .00074
+    }
+
+def compute_x_2(cosset):
+    visited = {}
+    counter = collections.Counter(cosset)
+    x_2 = 0
+    for ch in english_freq:
+        if ch not in visited:
+            f_i = counter[ch]/len(cosset)
+            F_i = english_freq[ch]
+            x_2 = x_2 + (f_i-F_i)**2/F_i
+            visited[ch] = 1
+    return x_2
+
+def find_key(ct, key_len):
+    cosets = []
+    x_2_table = []
+
+    # generate cosets from ciphertext with known key length
+    for i in range(key_len):
+        cosets.append([ct[j] for j in range(i, len(ct), key_len)])
+
+    # fill up x_2_table
+    for shift in range(65, 65+26, 1):
+        cosets_tmp = cosets[:]
+        for i in range(len(cosets_tmp)):
+            cosets_tmp[i] = [chr(65+(ord(ch) - shift)%26) for ch in cosets_tmp[i]]
+        x_2_table.append([compute_x_2(coset) for coset in cosets_tmp])
+
+    print("\n***** X2 table: https://pages.mtu.edu/~shene/NSF-4/Tutorial/VIG/Vig-Recover.html *****\n")
+    for i in range(len(x_2_table)):
+        print(x_2_table[i])
+
+    # obtain min index of each column of X2 table -> key character
+    min_idx = numpy.argmin(x_2_table, axis=0)
+    key = [chr(65+idx) for idx in min_idx]
+    return "".join(key)
+
+def repeat_key(key, length):
+    return (key * (int(length/len(key))+1))[:length]
+
+def decrypt(ct, key):
+    key_dup = repeat_key(key, len(ct))
+    pt = ''
+    for i in range(len(ct)):
+        pt = pt + chr( 65 + (ord(ct[i])-ord(key_dup[i]))%26 )
+    return pt
+
 def main():
     #initMatrix()
     print ("length of the str: ", n)
     vigenereAlgorithm(strTest, 1)
-    for i in range(0, len(keyArray)):
-        print (keyArray[i])
-
+    #for i in range(0, len(keyArray)):
+    #    print (keyArray[i])
+    key_len = keyArray[0]
+    print("\n[*] Key Length = " + str(key_len))
+    key = find_key(strTest, key_len)
+    print("\n[*] Key = " + key)
+    pt = decrypt(strTest, key)
+    print("\n[*] Plaintext = " + pt)
 
 if __name__ == "__main__":
     strTest = "CHREEVOAHMAERATBIAXXWTNXBEEOPHBSBQMQEQERBWRVXUOAKXAOSXXWEAHBWGJMMQMNKGRFVGXWTRZXWIAKLXFPSKAUTEMNDCMGTSXMXBTUIADNGMGPSRELXNJELXVRVPRTULHDNQWTWDTYGBPHXTFALJHASVBFXNGLLCHRZBWELEKMSJIKNBHWRJGNMGJSGLXFEYPHAGNRBIEQJTAMRVLCRREMNDGLXRRIMGNSNRWCHRQHAEYEVTAQEBBIPEEWEVKAKOEWADREMXMTBHHCHRTKDNVRZCHRCLQOHPWQAIIWXNRMGWOIIFKEE"
+    #strTest = "IFMSWFCNICXKDICSAOOSSHRVKJFDNFCJIPZFGVBPGGYVPGTHJVPYHMPRRJKSCUKXKSYZQSHAOFMCEWIYRPZSFVNTGRKEEQXRNVBIASTVDDKSUFKTMWOVQEKSUVPKXRGOOJBGKKCHASCEDPBZWGQDLVQKJTTTYZQTBBOZLJMSTYGVASUKFXLOTIGKXRHFPENHCEBWHDGJJXOSFSWGHCOJMWBBPFBTTHJYMJLSEFLIXBVVBSBFGTRXHBUVNIXADVPQNHGEBAXRGOATEZGERDNFUVJKXG"
+    #strTest = "NWAIWEBBRFQFOCJPUGDOJVBGWSPTWRZ"
+    #strTest = "VVQGYTVVVKALURWFHQACMMVLEHUCATWFHHIPLXHVUWSCIGINCMUHNHQRMSUIMHWZODXTNAEKVVQGYTVVQPHXINWCABASYYMTKSZRCXWRPRFWYHXYGFIPSBWKQAMZYBXJQQABJEMTCHQSNAEKVVQGYTVVPCAQPBSLURQUCVMVPQUTMMLVHWDHNFIKJCPXMYEIOCDTXBJWKQGAN"
     n = len(strTest)
 
 
