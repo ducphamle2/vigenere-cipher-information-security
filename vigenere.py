@@ -95,6 +95,8 @@ def indexOfCoincidence(str):
 
 def generateSubstring(str, length, count):
     if length == 1:  # m = 1 means the entire string already
+        for i in range (0, n):
+            letterMatrix[searchLetter(ord(str[i]))][1] += 1 # increment occurrence of the original text from 0 to n
         return str
     substr = []
     while count < n:  # since we have a cipher text size n, so always generate a substring to n max
@@ -185,12 +187,15 @@ def main():
     vigenereAlgorithm(strTest, 1)
     #for i in range(0, len(keyArray)):
     #    print (keyArray[i])
-    key_len = keyArray[0]
-    print("\n[*] Key Length = " + str(key_len))
-    key = find_key(strTest, key_len)
-    print("\n[*] Key = " + key)
-    pt = decrypt(strTest, key)
-    print("\n[*] Plaintext = " + pt)
+    if len(keyArray) == 0:
+        print ("Cannot find m such that the key is meaningful")
+    else:
+        key_len = keyArray[0]
+        print("\n[*] Key Length = " + str(key_len))
+        key = find_key(strTest, key_len)
+        print("\n[*] Key = " + key)
+        pt = decrypt(strTest, key)
+        print("\n[*] Plaintext = " + pt)
 
 if __name__ == "__main__":
     strTest = "CHREEVOAHMAERATBIAXXWTNXBEEOPHBSBQMQEQERBWRVXUOAKXAOSXXWEAHBWGJMMQMNKGRFVGXWTRZXWIAKLXFPSKAUTEMNDCMGTSXMXBTUIADNGMGPSRELXNJELXVRVPRTULHDNQWTWDTYGBPHXTFALJHASVBFXNGLLCHRZBWELEKMSJIKNBHWRJGNMGJSGLXFEYPHAGNRBIEQJTAMRVLCRREMNDGLXRRIMGNSNRWCHRQHAEYEVTAQEBBIPEEWEVKAKOEWADREMXMTBHHCHRTKDNVRZCHRCLQOHPWQAIIWXNRMGWOIIFKEE"
